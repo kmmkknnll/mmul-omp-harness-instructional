@@ -12,11 +12,20 @@ const char* dgemm_desc = "Basic implementation, OpenMP-enabled, three-loop dgemm
  */
 void square_dgemm(int n, double* A, double* B, double* C) 
 {
-   // insert your code here: implementation of basic matrix multiply with OpenMP parallelism enabled
+    #pragma omp parallel
+    {
+        LIKWID_MARKER_START(MY_MARKER_REGION_NAME);
 
-   // be sure to include LIKWID_MARKER_START(MY_MARKER_REGION_NAME) inside the block of parallel code,
-   // but before your matrix multiply code, and then include LIKWID_MARKER_STOP(MY_MARKER_REGION_NAME)
-   // after the matrix multiply code but before the end of the parallel code block.
+        #pragma omp for collapse(2) schedule(static)
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                for (int k = 0; k < n; ++k) {
+                    C[i * n + j] +=
+                        A[i * n + k] * B[k * n + j];
+                }
+            }
+        }
 
-   std::cout << "Insert your basic matrix multiply, openmp-parallel edition here " << std::endl;
+        LIKWID_MARKER_STOP(MY_MARKER_REGION_NAME);
+    }
 }
